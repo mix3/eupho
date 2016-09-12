@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package eupho;
+
+service Eupho {
+	rpc GetTest(GetTestRequest) returns (GetTestResponse) {}
+	rpc Result(ResultRequest) returns (ResultResponse) {}
+}
+
+message GetTestRequest {
+}
+
+message GetTestResponse {
+	string path = 1;
+}
+
+message ResultRequest {
+	string path = 1;
+	string json = 2;
+}
+
+message ResultResponse {
+}
