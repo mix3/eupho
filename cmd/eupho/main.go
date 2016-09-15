@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/mix3/eupho"
-	"github.com/mix3/eupho/formatter"
+	formatter "github.com/shogo82148/go-prove/formatter"
 )
 
 func main() {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/Songmu/retry"
+	"github.com/shogo82148/go-prove"
 	"github.com/soh335/sliceflag"
 	"google.golang.org/grpc"
 )
@@ -24,8 +25,8 @@ type Slave struct {
 	Exec    string
 	Plugins []Plugin
 
-	chanTests  chan *Test
-	chanSuites chan *Test
+	chanTests  chan *prove.Test
+	chanSuites chan *prove.Test
 	wgWorkers  *sync.WaitGroup
 	pluginArgs []string
 	version    bool
@@ -37,8 +38,8 @@ func NewSlave() *Slave {
 	s := &Slave{
 		FlagSet:    flag.NewFlagSet("eupho", flag.ExitOnError),
 		Plugins:    []Plugin{},
-		chanTests:  make(chan *Test),
-		chanSuites: make(chan *Test),
+		chanTests:  make(chan *prove.Test),
+		chanSuites: make(chan *prove.Test),
 		wgWorkers:  &sync.WaitGroup{},
 	}
 	s.FlagSet.IntVar(&s.Jobs, "j", 1, "")
@@ -120,7 +121,7 @@ func (s *Slave) Run(args []string) {
 				break
 			}
 
-			s.chanTests <- &Test{
+			s.chanTests <- &prove.Test{
 				Path: path,
 				Env:  []string{},
 				Exec: s.Exec,

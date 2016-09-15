@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/shogo82148/go-prove"
 	"github.com/shogo82148/go-tap"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -23,7 +24,7 @@ type Master struct {
 	Addr    string
 	Timeout time.Duration
 
-	Formatter Formatter
+	Formatter prove.Formatter
 
 	timeouter  *time.Timer
 	testFiles  []string
@@ -114,7 +115,7 @@ func (m *Master) stopServe() {
 
 func (m *Master) report() {
 	for path, suite := range m.testResult {
-		m.Formatter.OpenTest(&Test{
+		m.Formatter.OpenTest(&prove.Test{
 			Path:  path,
 			Suite: suite,
 		})

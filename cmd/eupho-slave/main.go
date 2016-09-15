@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/mix3/eupho"
-	_ "github.com/mix3/eupho/plugin"
+	_ "github.com/shogo82148/go-prove/plugin"
 )
 
 func main() {
