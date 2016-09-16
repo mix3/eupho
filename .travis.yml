@@ -10,51 +10,22 @@ script:
 before_deploy:
   - go get -t -v ./...
   - go get github.com/mitchellh/gox
-  - gox -os="linux freebsd openbsd netbsd" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
+  - gox -os="linux" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
 deploy:
+  skip_cleanup: true
   provider: releases
   api_key:
     secure: "P6kPD800QSNoEDAtUvN+3oZG9UvQRkP1TMUlCnNx6CynURSDSzRFp28V8fzWAAKKUvPPUbAEsMhIog9CebwrW6QWLxSONomvva2IijdqQyFloFQ/tkdy+/4uXlZIbfnWRmRYSwYFd7J9zGSWKxARq+zRyoiNbzwHtoCgEW0HVXQxg64Dn/naSds0lce1BE4GBA5ApxTtKwclOCEwQKn7dP5WO21KmXkKZPvtj6yHyRavDm9dDHwz5vOh+nSardokWrjNFlnOBYyq6/wgGGYybl2jB1AHQZM4yX6c3o4K2B5xzBTzYGg2MZqOM5a7wKFveg2jVsbuAphlZCIpsCvF/DmorpqWOY5h0ciHi5FWlLDQxitiaWvIEZCQ32P0dXZIJYcJ6O2pj4gNCBXkHXdut+WIVO24IZLpiE/GgU1/itZalG1RzaHq26W5kRNgg5ZlkUxOEgNhDxikr+X5rBFTKL1OCxWmDo5odcsGE7zGO/iajKxq3JWUnGat56gG121/yy5UpuamvKesV/QSJBdyyr0w/BgsvWWYTwW5uj1u59YBNApdm1Jv0nrTkN7HADGqDB1d5crm4Vi8hx0WW4xYnhmD3Hx06KJcJ6DyjgAjVDEU/LdyP7q09icWP3xHZkQ88I0/E0m04S+1SvKQxBksJNn38OzKftErU6SassQ6koU="
   file:
-    - build/eupho_darwin_386
-    - build/eupho_darwin_amd64
-    - build/eupho_freebsd_386
-    - build/eupho_freebsd_amd64
-    - build/eupho_freebsd_arm
     - build/eupho_linux_386
     - build/eupho_linux_amd64
     - build/eupho_linux_arm
-    - build/eupho_netbsd_386
-    - build/eupho_netbsd_amd64
-    - build/eupho_netbsd_arm
-    - build/eupho_openbsd_386
-    - build/eupho_openbsd_amd64
-    - build/eupho-slave_darwin_386
-    - build/eupho-slave_darwin_amd64
-    - build/eupho-slave_freebsd_386
-    - build/eupho-slave_freebsd_amd64
-    - build/eupho-slave_freebsd_arm
     - build/eupho-slave_linux_386
     - build/eupho-slave_linux_amd64
     - build/eupho-slave_linux_arm
-    - build/eupho-slave_netbsd_386
-    - build/eupho-slave_netbsd_amd64
-    - build/eupho-slave_netbsd_arm
-    - build/eupho-slave_openbsd_386
-    - build/eupho-slave_openbsd_amd64
-    - build/eupho-solo_darwin_386
-    - build/eupho-solo_darwin_amd64
-    - build/eupho-solo_freebsd_386
-    - build/eupho-solo_freebsd_amd64
-    - build/eupho-solo_freebsd_arm
     - build/eupho-solo_linux_386
     - build/eupho-solo_linux_amd64
     - build/eupho-solo_linux_arm
-    - build/eupho-solo_netbsd_386
-    - build/eupho-solo_netbsd_amd64
-    - build/eupho-solo_netbsd_arm
-    - build/eupho-solo_openbsd_386
-    - build/eupho-solo_openbsd_amd64
   on:
     go: '1.7'
     repo: mix3/eupho
