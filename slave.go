@@ -1,7 +1,6 @@
 package eupho
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/Songmu/retry"
 	"github.com/soh335/sliceflag"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
