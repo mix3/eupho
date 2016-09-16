@@ -54,9 +54,9 @@ done_testing;`,
 	}
 
 	ok, err := regexp.Match(`<testsuites>
-	<testsuite tests="1" failures="0" time="0.[0-9]+" name="[^"]*">
+	<testsuite tests="1" failures="0" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
-		<testcase classname="[^"]*" name="" time="0.[0-9]+"></testcase>
+		<testcase classname="[^"]*" name="" time="[0-9\.]+"></testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
 	if err != nil {
@@ -111,9 +111,9 @@ done_testing;`,
 	}
 
 	ok, err := regexp.Match(`<testsuites>
-	<testsuite tests="1" failures="1" time="0.[0-9]+" name="[^"]*">
+	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
-		<testcase classname="[^"]*" name="" time="0.[0-9]+">
+		<testcase classname="[^"]*" name="" time="[0-9\.]+">
 			<failure message="not ok" type=""></failure>
 		</testcase>
 	</testsuite>
@@ -153,9 +153,9 @@ done_testing;`,
 	}
 
 	ok, err := regexp.Match(`<testsuites>
-	<testsuite tests="1" failures="0" time="0.[0-9]+" name="[^"]*">
+	<testsuite tests="1" failures="0" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
-		<testcase classname="[^"]*" name="" time="0.[0-9]+"></testcase>
+		<testcase classname="[^"]*" name="" time="[0-9\.]+"></testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
 	if err != nil {
@@ -193,9 +193,9 @@ done_testing;`,
 	}
 
 	ok, err := regexp.Match(`<testsuites>
-	<testsuite tests="1" failures="1" time="0.[0-9]+" name="[^"]*">
+	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
-		<testcase classname="[^"]*" name="" time="0.[0-9]+">
+		<testcase classname="[^"]*" name="" time="[0-9\.]+">
 			<failure message="not ok" type=""></failure>
 		</testcase>
 	</testsuite>
