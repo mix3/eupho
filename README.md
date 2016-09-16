@@ -9,13 +9,22 @@
 ```
 go get github.com/mix3/eupho/cmd/eupho
 go get github.com/mix3/eupho/cmd/eupho-slave
+go get github.com/mix3/eupho/cmd/eupho-solo
 ```
 
 ## USAGE
+
+### master/slave
 
 ```
 eupho [options] [files or directories]
 ```
 ```
 eupho-slave [options]
+```
+
+### solo
+
+```
+eupho-solo [options] [files or directories]
 ```
