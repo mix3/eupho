@@ -62,10 +62,10 @@ func (s *Solo) ParseArgs(args []string) {
 	}
 	defer l.Close()
 
-	s.Master.ParseArgs([]string{
+	s.Master.ParseArgs(append([]string{
 		"-timeout", s.timeout,
 		"-addr", l.Addr().String(),
-	})
+	}, s.FlagSet.Args()...))
 
 	appendArgs := []string{}
 	for _, p := range s.pluginArgs {
