@@ -46,9 +46,9 @@ func NewMaster() *Master {
 		endCh:      make(chan error),
 		exitCode:   0,
 	}
-	m.FlagSet.StringVar(&m.Addr, "addr", "127.0.0.1:19300", "")
-	m.FlagSet.DurationVar(&m.Timeout, "timeout", 10*time.Minute, "")
-	m.FlagSet.BoolVar(&m.version, "version", false, "Show version of go-prove")
+	m.FlagSet.StringVar(&m.Addr, "addr", "127.0.0.1:19300", "Listen addr")
+	m.FlagSet.DurationVar(&m.Timeout, "timeout", 10*time.Minute, "Timeout duration")
+	m.FlagSet.BoolVar(&m.version, "version", false, "Show version of eupho")
 	return m
 }
 

@@ -40,11 +40,11 @@ func NewSolo() *Solo {
 	s.FlagSet.StringVar(&s.timeout, "timeout", "10m", "")
 
 	// for slave
-	s.FlagSet.StringVar(&s.jobs, "j", "1", "")
-	s.FlagSet.StringVar(&s.jobs, "jobs", "1", "")
+	s.FlagSet.StringVar(&s.jobs, "j", "1", "Run N test jobs in parallel")
+	s.FlagSet.StringVar(&s.jobs, "jobs", "1", "Run N test jobs in parallel")
 	s.FlagSet.StringVar(&s.exec, "exec", "perl", "")
-	s.FlagSet.StringVar(&s.maxDelay, "max-delay", "3s", "")
-	s.FlagSet.StringVar(&s.maxRetry, "max-retry", "10", "")
+	s.FlagSet.StringVar(&s.maxDelay, "max-delay", "3s", "Max delay duration")
+	s.FlagSet.StringVar(&s.maxRetry, "max-retry", "10", "Max retry num")
 	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "plugin", []string{}, "plugins")
 	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "P", []string{}, "plugins")
 
