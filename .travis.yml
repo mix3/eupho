@@ -10,7 +10,7 @@ script:
 before_deploy:
   - go get -t -v ./...
   - go get github.com/mitchellh/gox
-  - gox -os="darwin linux freebsd openbsd netbsd" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
+  - CGO_ENABLED=0 gox -os="darwin linux freebsd openbsd netbsd" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
 deploy:
   provider: releases
   api_key:
