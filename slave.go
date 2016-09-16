@@ -42,13 +42,13 @@ func NewSlave() *Slave {
 		chanSuites: make(chan *prove.Test),
 		wgWorkers:  &sync.WaitGroup{},
 	}
-	s.FlagSet.IntVar(&s.Jobs, "j", 1, "")
-	s.FlagSet.IntVar(&s.Jobs, "jobs", 1, "")
-	s.FlagSet.StringVar(&s.Addr, "addr", "127.0.0.1:19300", "")
+	s.FlagSet.IntVar(&s.Jobs, "j", 1, "Run N test jobs in parallel")
+	s.FlagSet.IntVar(&s.Jobs, "jobs", 1, "Run N test jobs in parallel")
+	s.FlagSet.StringVar(&s.Addr, "addr", "127.0.0.1:19300", "Listen addr")
 	s.FlagSet.StringVar(&s.Exec, "exec", "perl", "")
-	s.FlagSet.BoolVar(&s.version, "version", false, "Show version of go-prove")
-	s.FlagSet.DurationVar(&s.maxDelay, "max-delay", 3*time.Second, "")
-	s.FlagSet.UintVar(&s.maxRetry, "max-retry", 10, "")
+	s.FlagSet.BoolVar(&s.version, "version", false, "Show version of eupho-slave")
+	s.FlagSet.DurationVar(&s.maxDelay, "max-delay", 3*time.Second, "Max delay duration")
+	s.FlagSet.UintVar(&s.maxRetry, "max-retry", 10, "Max retry num")
 	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "plugin", []string{}, "plugins")
 	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "P", []string{}, "plugins")
 	return s
@@ -83,7 +83,7 @@ func (s *Slave) Run(args []string) {
 	}
 
 	if s.version {
-		fmt.Printf("eupho %s, %s built for %s/%s\n", Version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+		fmt.Printf("eupho-slave %s, %s built for %s/%s\n", Version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		return
 	}
 
