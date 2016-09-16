@@ -1,5 +1,7 @@
 # eupho
 
+[![Build Status](https://travis-ci.org/mix3/eupho.svg?branch=master)](https://travis-ci.org/mix3/eupho)
+
 [go-prove](https://github.com/shogo82148/go-prove) を master/slave で動作するようにしてみた
 
 ## INSTALL
