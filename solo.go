@@ -1,60 +1,58 @@
 package eupho
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"runtime"
 	"sync"
 
-	"github.com/soh335/sliceflag"
+	"github.com/jessevdk/go-flags"
 )
 
 type Solo struct {
-	FlagSet *flag.FlagSet
-
-	Master  *Master
-	timeout string
-
-	Slave      *Slave
-	jobs       string
-	exec       string
-	maxDelay   string
-	maxRetry   string
-	pluginArgs []string
-
-	version bool
+	Master *Master
+	Slave  *Slave
 
 	wg sync.WaitGroup
+
+	opts soloOptions
+}
+
+type soloOptions struct {
+	Jobs       string   `short:"j" long:"jobs"      default:"1"    description:"Run N test jobs in parallel"`
+	Exec       string   `          long:"exec"      default:"perl" description:""`
+	PluginArgs []string `short:"P" long:"plugin"                   description:"plugins"`
+	Version    bool     `          long:"version"                  description:"Show version of eupho-slave"`
+	MaxDelay   string   `          long:"max-delay" default:"3s"   description:"Max delay duration"`
+	MaxRetry   string   `          long:"max-retry" default:"10"   description:"Max retry num"`
+	Timeout    string   `          long:"timeout"   default:"10m"  description:"Timeout duration"`
+	Quiet      bool     `short:"q" long:"quiet"                    description:"quiet"`
 }
 
 func NewSolo() *Solo {
-	s := &Solo{
-		FlagSet: flag.NewFlagSet("eupho", flag.ExitOnError),
-		Master:  NewMaster(),
-		Slave:   NewSlave(),
+	return &Solo{
+		Master: NewMaster(),
+		Slave:  NewSlave(),
 	}
-
-	// for master
-	s.FlagSet.StringVar(&s.timeout, "timeout", "10m", "")
-
-	// for slave
-	s.FlagSet.StringVar(&s.jobs, "j", "1", "Run N test jobs in parallel")
-	s.FlagSet.StringVar(&s.jobs, "jobs", "1", "Run N test jobs in parallel")
-	s.FlagSet.StringVar(&s.exec, "exec", "perl", "")
-	s.FlagSet.StringVar(&s.maxDelay, "max-delay", "3s", "Max delay duration")
-	s.FlagSet.StringVar(&s.maxRetry, "max-retry", "10", "Max retry num")
-	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "plugin", []string{}, "plugins")
-	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "P", []string{}, "plugins")
-
-	s.FlagSet.BoolVar(&s.version, "version", false, "Show version of eupho-solo")
-
-	return s
 }
 
 func (s *Solo) ParseArgs(args []string) {
-	s.FlagSet.Parse(args)
+	var opts soloOptions
+	parser := flags.NewParser(
+		&opts,
+		flags.HelpFlag|flags.PassDoubleDash,
+	)
+	moreArgs, err := parser.ParseArgs(args)
+	if err != nil {
+		fmt.Println(err)
+		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
+			os.Exit(0)
+		}
+		os.Exit(1)
+	}
+	s.opts = opts
 
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -63,24 +61,25 @@ func (s *Solo) ParseArgs(args []string) {
 	defer l.Close()
 
 	s.Master.ParseArgs(append([]string{
-		"-timeout", s.timeout,
-		"-addr", l.Addr().String(),
-	}, s.FlagSet.Args()...))
+		"--timeout", s.opts.Timeout,
+		"--addr", l.Addr().String(),
+		"--quiet",
+	}, moreArgs...))
 
-	appendArgs := []string{}
-	for _, p := range s.pluginArgs {
-		appendArgs = append(appendArgs, "-plugin", p)
+	slaveArgs := []string{
+		"--addr", l.Addr().String(),
+		"--jobs", s.opts.Jobs,
+		"--exec", s.opts.Exec,
+		"--max-delay", s.opts.MaxDelay,
+		"--max-retry", s.opts.MaxRetry,
 	}
-	s.Slave.ParseArgs(append(
-		[]string{
-			"-addr", l.Addr().String(),
-			"-jobs", s.jobs,
-			"-exec", s.exec,
-			"-max-delay", s.maxDelay,
-			"-max-retry", s.maxRetry,
-		},
-		appendArgs...,
-	))
+	for _, p := range s.opts.PluginArgs {
+		slaveArgs = append(slaveArgs, "--plugin", p)
+	}
+	if s.opts.Quiet {
+		slaveArgs = append(slaveArgs, "--quiet")
+	}
+	s.Slave.ParseArgs(slaveArgs)
 }
 
 func (s *Solo) Run(args []string) int {
@@ -88,7 +87,7 @@ func (s *Solo) Run(args []string) int {
 		s.ParseArgs(args)
 	}
 
-	if s.version {
+	if s.opts.Version {
 		fmt.Printf("eupho-solo %s, %s built for %s/%s\n", Version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		return 0
 	}

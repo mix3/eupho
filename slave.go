@@ -2,66 +2,71 @@ package eupho
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/Songmu/retry"
-	"github.com/shogo82148/go-prove"
-	"github.com/soh335/sliceflag"
+	"github.com/jessevdk/go-flags"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
 type Slave struct {
-	FlagSet *flag.FlagSet
-
-	Addr    string
-	Jobs    int
-	Exec    string
 	Plugins []Plugin
 
-	chanTests  chan *prove.Test
-	chanSuites chan *prove.Test
+	chanTests  chan *Test
+	chanSuites chan *Test
 	wgWorkers  *sync.WaitGroup
-	pluginArgs []string
-	version    bool
-	maxDelay   time.Duration
-	maxRetry   uint
+
+	opts slaveOptions
+}
+
+type slaveOptions struct {
+	Addr       string        `             long:"addr"      default:"127.0.0.1:19300" description:"Listen addr"`
+	Jobs       int           `short:"j"    long:"jobs"                                description:"Run N test jobs in parallel"`
+	Exec       string        `             long:"exec"      default:"perl"            description:""`
+	PluginArgs []string      `short:"P"    long:"plugin"                              description:"plugins"`
+	Version    bool          `             long:"version"                             description:"Show version of eupho-slave"`
+	MaxDelay   time.Duration `             long:"max-delay" default:"3s"              description:"Max delay duration"`
+	MaxRetry   uint          `             long:"max-retry" default:"10"              description:"Max retry num"`
+	Quiet      bool          `short:"q"    long:"quiet"                               description:"quiet"`
 }
 
 func NewSlave() *Slave {
-	s := &Slave{
-		FlagSet:    flag.NewFlagSet("eupho", flag.ExitOnError),
+	return &Slave{
 		Plugins:    []Plugin{},
-		chanTests:  make(chan *prove.Test),
-		chanSuites: make(chan *prove.Test),
+		chanTests:  make(chan *Test),
+		chanSuites: make(chan *Test),
 		wgWorkers:  &sync.WaitGroup{},
 	}
-	s.FlagSet.IntVar(&s.Jobs, "j", 1, "Run N test jobs in parallel")
-	s.FlagSet.IntVar(&s.Jobs, "jobs", 1, "Run N test jobs in parallel")
-	s.FlagSet.StringVar(&s.Addr, "addr", "127.0.0.1:19300", "Listen addr")
-	s.FlagSet.StringVar(&s.Exec, "exec", "perl", "")
-	s.FlagSet.BoolVar(&s.version, "version", false, "Show version of eupho-slave")
-	s.FlagSet.DurationVar(&s.maxDelay, "max-delay", 3*time.Second, "Max delay duration")
-	s.FlagSet.UintVar(&s.maxRetry, "max-retry", 10, "Max retry num")
-	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "plugin", []string{}, "plugins")
-	sliceflag.StringVar(s.FlagSet, &s.pluginArgs, "P", []string{}, "plugins")
-	return s
 }
 
 func (s *Slave) ParseArgs(args []string) {
-	s.FlagSet.Parse(args)
-
-	if s.Jobs < 1 {
-		s.Jobs = 1
+	var opts slaveOptions
+	parser := flags.NewParser(
+		&opts,
+		flags.HelpFlag|flags.PassDoubleDash,
+	)
+	_, err := parser.ParseArgs(args)
+	if err != nil {
+		fmt.Println(err)
+		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
+			os.Exit(0)
+		}
+		os.Exit(1)
 	}
 
-	for _, plugin := range s.pluginArgs {
+	s.opts = opts
+	if s.opts.Jobs < 1 {
+		s.opts.Jobs = 1
+	}
+
+	for _, plugin := range s.opts.PluginArgs {
 		a := strings.SplitN(plugin, "=", 2)
 		name := a[0]
 		pluginArgs := ""
@@ -82,20 +87,20 @@ func (s *Slave) Run(args []string) {
 		s.ParseArgs(args)
 	}
 
-	if s.version {
+	if s.opts.Version {
 		fmt.Printf("eupho-slave %s, %s built for %s/%s\n", Version, runtime.Version(), runtime.GOOS, runtime.GOARCH)
 		return
 	}
 
-	for i := 0; i < s.Jobs; i++ {
+	for i := 0; i < s.opts.Jobs; i++ {
 		w := NewWorker(s)
 		w.Start()
 	}
 
 	conn, err := grpc.Dial(
-		s.Addr,
+		s.opts.Addr,
 		grpc.WithInsecure(),
-		grpc.WithBackoffMaxDelay(s.maxDelay),
+		grpc.WithBackoffMaxDelay(s.opts.MaxDelay),
 	)
 	if err != nil {
 		panic(err)
@@ -106,7 +111,7 @@ func (s *Slave) Run(args []string) {
 	go func() {
 		for {
 			var path string
-			if err := retry.Retry(s.maxRetry, s.maxDelay, func() error {
+			if err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
 				res, err := client.GetTest(context.Background(), &GetTestRequest{})
 				if err != nil {
 					return err
@@ -121,10 +126,11 @@ func (s *Slave) Run(args []string) {
 				break
 			}
 
-			s.chanTests <- &prove.Test{
-				Path: path,
-				Env:  []string{},
-				Exec: s.Exec,
+			s.chanTests <- &Test{
+				Path:  path,
+				Env:   []string{},
+				Exec:  s.opts.Exec,
+				Quiet: s.opts.Quiet,
 			}
 		}
 		close(s.chanTests)
@@ -137,7 +143,7 @@ func (s *Slave) Run(args []string) {
 		if err != nil {
 			panic(err)
 		}
-		if err := retry.Retry(s.maxRetry, s.maxDelay, func() error {
+		if err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
 			_, err := client.Result(
 				context.Background(),
 				&ResultRequest{
