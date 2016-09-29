@@ -1,14 +1,32 @@
-package eupho
+package eupho_test
 
 import (
+	"io/ioutil"
 	"net"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
+	"github.com/mix3/eupho"
+	"github.com/mix3/eupho/formatter"
 	"github.com/sevagh/stdcap"
-	formatter "github.com/shogo82148/go-prove/formatter"
 )
+
+func newTempFiles(files map[string]string) (string, error) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		return "", err
+	}
+	for name, content := range files {
+		tmpFn := filepath.Join(dir, name)
+		if err := ioutil.WriteFile(tmpFn, []byte(content), 0644); err != nil {
+			os.RemoveAll(dir)
+			return "", err
+		}
+	}
+	return dir, nil
+}
 
 func TestMasterSlaveOK(t *testing.T) {
 	dir, err := newTempFiles(map[string]string{
@@ -31,17 +49,17 @@ done_testing;`,
 	l.Close()
 
 	go func() {
-		s := NewSlave()
+		s := eupho.NewSlave()
 		s.ParseArgs([]string{
-			"-addr", addr,
+			"--addr", addr,
 		})
 		s.Run(nil)
 	}()
 
-	m := NewMaster()
+	m := eupho.NewMaster()
 	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
-		"-addr", addr,
+		"--addr", addr,
 		dir,
 	})
 	code := 0
@@ -88,17 +106,17 @@ done_testing;`,
 	l.Close()
 
 	go func() {
-		s := NewSlave()
+		s := eupho.NewSlave()
 		s.ParseArgs([]string{
-			"-addr", addr,
+			"--addr", addr,
 		})
 		s.Run(nil)
 	}()
 
-	m := NewMaster()
+	m := eupho.NewMaster()
 	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
-		"-addr", addr,
+		"--addr", addr,
 		dir,
 	})
 	code := 1
@@ -114,7 +132,7 @@ done_testing;`,
 	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
 		<testcase classname="[^"]*" name="" time="[0-9\.]+">
-			<failure message="not ok" type=""></failure>
+			<failure message="not ok" type=""><[^>]*></failure>
 		</testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
@@ -138,7 +156,7 @@ done_testing;`,
 	}
 	defer os.RemoveAll(dir)
 
-	s := NewSolo()
+	s := eupho.NewSolo()
 	s.Master.Formatter = &formatter.JUnitFormatter{}
 	s.ParseArgs([]string{
 		dir,
@@ -178,7 +196,7 @@ done_testing;`,
 	}
 	defer os.RemoveAll(dir)
 
-	s := NewSolo()
+	s := eupho.NewSolo()
 	s.Master.Formatter = &formatter.JUnitFormatter{}
 	s.ParseArgs([]string{
 		dir,
@@ -196,7 +214,7 @@ done_testing;`,
 	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
 		<testcase classname="[^"]*" name="" time="[0-9\.]+">
-			<failure message="not ok" type=""></failure>
+			<failure message="not ok" type=""><[^>]*></failure>
 		</testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
