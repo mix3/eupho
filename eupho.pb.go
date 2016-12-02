@@ -53,6 +53,13 @@ func (m *GetTestResponse) String() string            { return proto.CompactTextS
 func (*GetTestResponse) ProtoMessage()               {}
 func (*GetTestResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
+func (m *GetTestResponse) GetPath() string {
+	if m != nil {
+		return m.Path
+	}
+	return ""
+}
+
 type ResultRequest struct {
 	Path string `protobuf:"bytes,1,opt,name=path" json:"path,omitempty"`
 	Json string `protobuf:"bytes,2,opt,name=json" json:"json,omitempty"`
@@ -62,6 +69,20 @@ func (m *ResultRequest) Reset()                    { *m = ResultRequest{} }
 func (m *ResultRequest) String() string            { return proto.CompactTextString(m) }
 func (*ResultRequest) ProtoMessage()               {}
 func (*ResultRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
+
+func (m *ResultRequest) GetPath() string {
+	if m != nil {
+		return m.Path
+	}
+	return ""
+}
+
+func (m *ResultRequest) GetJson() string {
+	if m != nil {
+		return m.Json
+	}
+	return ""
+}
 
 type ResultResponse struct {
 }
@@ -84,7 +105,7 @@ var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion3
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for Eupho service
 
@@ -180,7 +201,7 @@ var _Eupho_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: fileDescriptor0,
+	Metadata: "eupho.proto",
 }
 
 func init() { proto.RegisterFile("eupho.proto", fileDescriptor0) }
