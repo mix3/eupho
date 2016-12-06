@@ -15,12 +15,12 @@ func TestJUnit_success(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.WriteString(`print "1..1\nok 1\n";`)
+	f.WriteString(`echo "1..1\nok 1"`)
 
 	test := &eupho.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
-		Exec: "perl",
+		Exec: "sh",
 	}
 
 	test.Run()
@@ -42,12 +42,12 @@ func TestJUnit_fail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.WriteString(`print "1..1\nnot ok 1\n";`)
+	f.WriteString(`echo "1..1\nnot ok 1"`)
 
 	test := &eupho.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
-		Exec: "perl",
+		Exec: "sh",
 	}
 
 	test.Run()
@@ -69,12 +69,12 @@ func TestJUnit_failplan(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.WriteString(`print "1..2\nok 1\n";`)
+	f.WriteString(`echo "1..2\nok 1"`)
 
 	test := &eupho.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
-		Exec: "perl",
+		Exec: "sh",
 	}
 
 	test.Run()
