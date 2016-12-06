@@ -19,28 +19,33 @@ type Test struct {
 }
 
 func (t *Test) Run() *pet.Testsuite {
-	var (
-		r io.Reader
-		w io.WriteCloser
-	)
-	r, w = io.Pipe()
-	if !t.Quiet {
-		r = io.TeeReader(r, os.Stderr)
-	}
-
 	execParam, _ := shellwords.Parse(t.Exec)
 	execParam = append(execParam, t.Path)
-
 	cmd := exec.Command(execParam[0], execParam[1:]...)
 	cmd.Env = t.Env
-	cmd.Stdout = w
-	cmd.Stderr = w
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		t.Suite = errorTestsuite(err)
+		return t.Suite
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		t.Suite = errorTestsuite(err)
+		return t.Suite
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		t.Suite = errorTestsuite(err)
+		return t.Suite
+	}
+	go io.Copy(os.Stderr, stderr)
 
 	suiteCh := make(chan *pet.Testsuite)
 	go func() {
 		var (
 			suite       *pet.Testsuite
-			parser, err = pet.NewParser(r)
+			parser, err = pet.NewParser(stdout)
 		)
 		if err != nil {
 			suite = errorTestsuite(err)
@@ -56,10 +61,7 @@ func (t *Test) Run() *pet.Testsuite {
 		}
 		suiteCh <- suite
 	}()
-
-	cmd.Start()
 	cmd.Wait()
-	w.Close()
 
 	t.Suite = <-suiteCh
 
