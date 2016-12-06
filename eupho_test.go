@@ -127,12 +127,11 @@ done_testing;`,
 	if code != 1 {
 		t.Errorf("ExitCode want 1, but got %d\n", code)
 	}
-
 	ok, err := regexp.Match(`<testsuites>
 	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
 		<testcase classname="[^"]*" name="" time="[0-9\.]+">
-			<failure message="not ok" type=""><[^>]*></failure>
+			<failure message="not ok" type=""></failure>
 		</testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
@@ -214,7 +213,7 @@ done_testing;`,
 	<testsuite tests="1" failures="1" time="[0-9\.]+" name="[^"]*">
 		<properties></properties>
 		<testcase classname="[^"]*" name="" time="[0-9\.]+">
-			<failure message="not ok" type=""><[^>]*></failure>
+			<failure message="not ok" type=""></failure>
 		</testcase>
 	</testsuite>
 </testsuites>`, []byte(out))
