@@ -7,7 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/mattn/go-shellwords"
-	"github.com/mix3/pet"
+	pet "gopkg.in/mix3/pet.v1"
 )
 
 type Test struct {

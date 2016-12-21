@@ -13,10 +13,10 @@ import (
 	"time"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/mix3/pet"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
+	pet "gopkg.in/mix3/pet.v1"
 )
 
 type Master struct {
