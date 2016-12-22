@@ -183,12 +183,12 @@ func (m *Master) EndCheck(path string, ts *pet.Testsuite) {
 }
 
 func (m *Master) initTestFiles(submitted bool, testFiles []string) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	if submitted {
 		return
 	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	if m.testFiles != nil {
 		return
