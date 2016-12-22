@@ -4,12 +4,15 @@ go:
  - 1.7
  - tip
 sudo: false
+before_install:
+ - go get -u -v ./...
+ - go get -u -v github.com/sevagh/stdcap
 script:
-    - go test -v ./...
+ - go test -v ./...
 before_deploy:
-  - go get -t -v ./...
-  - go get github.com/mitchellh/gox
-  - gox -os="linux" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
+ - go get -t -v ./...
+ - go get github.com/mitchellh/gox
+ - gox -os="linux" -output build/{{.Dir}}_{{.OS}}_{{.Arch}} github.com/mix3/eupho/cmd/eupho github.com/mix3/eupho/cmd/eupho-slave github.com/mix3/eupho/cmd/eupho-solo
 deploy:
   skip_cleanup: true
   provider: releases
