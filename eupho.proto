@@ -8,6 +8,8 @@ service Eupho {
 }
 
 message GetTestRequest {
+	         bool   submitted  = 1;
+	repeated string test_files = 2;
 }
 
 message GetTestResponse {
