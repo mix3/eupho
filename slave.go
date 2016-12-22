@@ -1,7 +1,6 @@
 package eupho
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -154,17 +153,10 @@ func (s *Slave) Run(args []string) {
 	}()
 
 	for suite := range s.chanSuites {
-		b, err := json.Marshal(suite.Suite)
-		if err != nil {
-			panic(err)
-		}
 		err = retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
 			_, err := client.Result(
 				context.Background(),
-				&ResultRequest{
-					Path: suite.Path,
-					Json: string(b),
-				},
+				&ResultRequest{Path: suite.Path, Testsuite: suite.Suite},
 			)
 			if err != nil {
 				log.Println(err)
