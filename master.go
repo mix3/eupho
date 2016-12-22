@@ -1,7 +1,6 @@
 package eupho
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -14,7 +13,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
-	pet "gopkg.in/mix3/pet.v1"
+	pet "gopkg.in/mix3/pet.v2"
 )
 
 type Master struct {
@@ -146,10 +145,7 @@ func (m *Master) GetTest(ctx context.Context, req *GetTestRequest) (*GetTestResp
 }
 
 func (m *Master) Result(ctx context.Context, req *ResultRequest) (*ResultResponse, error) {
-	var ts pet.Testsuite
-	if err := json.Unmarshal([]byte(req.Json), &ts); err != nil {
-		return nil, err
-	}
+	ts := req.Testsuite
 	peer, ok := peer.FromContext(ctx)
 	if ok {
 		log.Printf("receive: %s <- %v", req.Path, peer.Addr)
@@ -163,7 +159,7 @@ func (m *Master) Result(ctx context.Context, req *ResultRequest) (*ResultRespons
 			}
 		}
 	}
-	m.EndCheck(req.Path, &ts)
+	m.EndCheck(req.Path, ts)
 	return &ResultResponse{}, nil
 }
 

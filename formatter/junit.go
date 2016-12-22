@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
+	"github.com/golang/protobuf/ptypes"
+	durpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/mix3/eupho"
 )
 
@@ -61,8 +62,9 @@ type JUnitFailure struct {
 	Contents string `xml:",cdata"`
 }
 
-func (f *JUnitFormatter) formatDuration(d time.Duration) string {
-	return fmt.Sprintf("%.3f", d.Seconds())
+func (f *JUnitFormatter) formatDuration(d *durpb.Duration) string {
+	dur, _ := ptypes.Duration(d)
+	return fmt.Sprintf("%.3f", dur.Seconds())
 }
 
 func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
@@ -112,7 +114,7 @@ func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
 			},
 		}
 		ts.TestCases = append(ts.TestCases, testCase)
-	} else if len(suite.Tests) != suite.Plan {
+	} else if int32(len(suite.Tests)) != suite.Plan {
 		ts.Errors++
 		testCase := JUnitTestCase{
 			Classname: className,
