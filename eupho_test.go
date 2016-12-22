@@ -52,6 +52,7 @@ done_testing;`,
 		s := eupho.NewSlave()
 		s.ParseArgs([]string{
 			"--addr", addr,
+			dir,
 		})
 		s.Run(nil)
 	}()
@@ -60,7 +61,6 @@ done_testing;`,
 	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
 		"--addr", addr,
-		dir,
 	})
 	code := 0
 	sc := stdcap.StdoutCapture()
@@ -109,6 +109,7 @@ done_testing;`,
 		s := eupho.NewSlave()
 		s.ParseArgs([]string{
 			"--addr", addr,
+			dir,
 		})
 		s.Run(nil)
 	}()
@@ -117,7 +118,6 @@ done_testing;`,
 	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
 		"--addr", addr,
-		dir,
 	})
 	code := 1
 	sc := stdcap.StdoutCapture()

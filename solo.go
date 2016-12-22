@@ -60,11 +60,11 @@ func (s *Solo) ParseArgs(args []string) {
 	}
 	defer l.Close()
 
-	s.Master.ParseArgs(append([]string{
+	s.Master.ParseArgs([]string{
 		"--timeout", s.opts.Timeout,
 		"--addr", l.Addr().String(),
 		"--quiet",
-	}, moreArgs...))
+	})
 
 	slaveArgs := []string{
 		"--addr", l.Addr().String(),
@@ -79,7 +79,7 @@ func (s *Solo) ParseArgs(args []string) {
 	if s.opts.Quiet {
 		slaveArgs = append(slaveArgs, "--quiet")
 	}
-	s.Slave.ParseArgs(slaveArgs)
+	s.Slave.ParseArgs(append(slaveArgs, moreArgs...))
 }
 
 func (s *Solo) Run(args []string) int {

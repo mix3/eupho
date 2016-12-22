@@ -6,9 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"path/filepath"
 	"runtime"
-	"strings"
 	"sync"
 	"time"
 
@@ -86,11 +84,6 @@ func (m *Master) Run(args []string) int {
 		return m.exitCode
 	}
 
-	m.testFiles = m.findTestFiles()
-	for _, file := range m.testFiles {
-		m.testResult[file] = nil
-	}
-
 	m.startServe()
 
 	if err := <-m.endCh; err != nil {
@@ -104,13 +97,6 @@ func (m *Master) Run(args []string) int {
 }
 
 func (m *Master) startServe() {
-	go func() {
-		for _, path := range m.testFiles {
-			m.testFileCh <- path
-		}
-		close(m.testFileCh)
-	}()
-
 	l, err := net.Listen("tcp", m.opts.Addr)
 	if err != nil {
 		panic(fmt.Sprintf("failed to listen: %v", err))
@@ -142,6 +128,8 @@ func (m *Master) report() {
 }
 
 func (m *Master) GetTest(ctx context.Context, req *GetTestRequest) (*GetTestResponse, error) {
+	m.initTestFiles(req.Submitted, req.TestFiles)
+
 	m.timeouter.Reset(m.opts.Timeout)
 
 	path := <-m.testFileCh
@@ -194,40 +182,36 @@ func (m *Master) EndCheck(path string, ts *pet.Testsuite) {
 	m.endCh <- nil
 }
 
-// Find Test Files
-func (m *Master) findTestFiles() []string {
-	files := []string{}
-	if len(m.args) == 0 {
-		files = m.appendFindTestFiles(files, "t")
-	} else {
-		for _, parent := range m.args {
-			files = m.appendFindTestFiles(files, parent)
+func (m *Master) initTestFiles(submitted bool, testFiles []string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if submitted {
+		return
+	}
+
+	if m.testFiles != nil {
+		return
+	}
+
+	go func() {
+		for _, path := range m.testFiles {
+			m.testFileCh <- path
 		}
+		close(m.testFileCh)
+	}()
+
+	m.testFiles = []string{}
+	for _, f := range testFiles {
+		if _, ok := m.testResult[f]; ok {
+			continue
+		}
+
+		m.testFiles = append(m.testFiles, f)
+		m.testResult[f] = nil
 	}
-	return files
-}
 
-func (m *Master) appendFindTestFiles(files []string, parent string) []string {
-	stat, err := os.Stat(parent)
-	if err != nil {
-		panic(err)
+	if len(m.testFiles) == 0 {
+		m.endCh <- nil
 	}
-	if !stat.IsDir() {
-		return append(files, parent)
-	}
-
-	filepath.Walk(
-		parent,
-		func(path string, info os.FileInfo, err error) error {
-			if info.IsDir() {
-				return nil
-			}
-
-			if strings.HasSuffix(path, ".t") {
-				files = append(files, path)
-			}
-
-			return nil
-		})
-	return files
 }

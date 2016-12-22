@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -24,6 +25,9 @@ type Slave struct {
 	wgWorkers  *sync.WaitGroup
 
 	opts slaveOptions
+	args []string
+
+	submitted bool
 }
 
 type slaveOptions struct {
@@ -47,12 +51,15 @@ func NewSlave() *Slave {
 }
 
 func (s *Slave) ParseArgs(args []string) {
-	var opts slaveOptions
+	var (
+		opts slaveOptions
+		err  error
+	)
 	parser := flags.NewParser(
 		&opts,
 		flags.HelpFlag|flags.PassDoubleDash,
 	)
-	_, err := parser.ParseArgs(args)
+	s.args, err = parser.ParseArgs(args)
 	if err != nil {
 		fmt.Println(err)
 		if e, ok := err.(*flags.Error); ok && e.Type == flags.ErrHelp {
@@ -97,6 +104,8 @@ func (s *Slave) Run(args []string) {
 		w.Start()
 	}
 
+	testFiles := s.findTestFiles()
+
 	conn, err := grpc.Dial(
 		s.opts.Addr,
 		grpc.WithInsecure(),
@@ -111,14 +120,20 @@ func (s *Slave) Run(args []string) {
 	go func() {
 		for {
 			var path string
-			if err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
-				res, err := client.GetTest(context.Background(), &GetTestRequest{})
+			err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
+				req := &GetTestRequest{Submitted: s.submitted}
+				if !s.submitted {
+					req.TestFiles = testFiles
+				}
+				res, err := client.GetTest(context.Background(), req)
 				if err != nil {
 					return err
 				}
+				s.submitted = true
 				path = res.Path
 				return nil
-			}); err != nil {
+			})
+			if err != nil {
 				log.Println(err)
 				break // ずっとエラるようだったら諦める
 			}
@@ -143,7 +158,7 @@ func (s *Slave) Run(args []string) {
 		if err != nil {
 			panic(err)
 		}
-		if err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
+		err = retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
 			_, err := client.Result(
 				context.Background(),
 				&ResultRequest{
@@ -155,8 +170,46 @@ func (s *Slave) Run(args []string) {
 				log.Println(err)
 			}
 			return err
-		}); err != nil {
+		})
+		if err != nil {
 			break // ずっとエラるようだったら諦める
 		}
 	}
+}
+
+// Find Test Files
+func (s *Slave) findTestFiles() []string {
+	files := []string{}
+	if len(s.args) == 0 {
+		files = s.appendFindTestFiles(files, "t")
+	} else {
+		for _, parent := range s.args {
+			files = s.appendFindTestFiles(files, parent)
+		}
+	}
+	return files
+}
+
+func (s *Slave) appendFindTestFiles(files []string, parent string) []string {
+	stat, err := os.Stat(parent)
+	if err != nil {
+		panic(err)
+	}
+	if !stat.IsDir() {
+		return append(files, parent)
+	}
+
+	filepath.Walk(parent, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+
+		if strings.HasSuffix(path, ".t") {
+			files = append(files, path)
+		}
+
+		return nil
+	})
+
+	return files
 }
