@@ -190,13 +190,6 @@ func (m *Master) initTestFiles(submitted bool, testFiles []string) {
 		return
 	}
 
-	go func() {
-		for _, path := range m.testFiles {
-			m.testFileCh <- path
-		}
-		close(m.testFileCh)
-	}()
-
 	m.testFiles = []string{}
 	for _, f := range testFiles {
 		if _, ok := m.testResult[f]; ok {
@@ -206,6 +199,13 @@ func (m *Master) initTestFiles(submitted bool, testFiles []string) {
 		m.testFiles = append(m.testFiles, f)
 		m.testResult[f] = nil
 	}
+
+	go func() {
+		for _, path := range m.testFiles {
+			m.testFileCh <- path
+		}
+		close(m.testFileCh)
+	}()
 
 	if len(m.testFiles) == 0 {
 		m.endCh <- nil
