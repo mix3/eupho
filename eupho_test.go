@@ -142,22 +142,32 @@ done_testing;`,
 	}
 
 	//<testsuites>
-	//    <testsuite tests="1" failures="1" errors="0" skipped="0" time="0.094" name="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_778020036_01_t">
+	//    <testsuite tests="2" failures="2" errors="0" skipped="0" time="0.082" name="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_230494120_01_t">
 	//        <properties></properties>
-	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_778020036_01_t" name="" time="0.094">
+	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_230494120_01_t" name="" time="0.082">
 	//            <failure message="not ok 1" type="TestFailed"></failure>
 	//            <system-out><![CDATA[not ok 1
+	//]]></system-out>
+	//        </testcase>
+	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_230494120_01_t" name="Test died with return code 1" time="0.000">
+	//            <failure message="not ok 2 - Test died with return code 1" type="TestFailed"></failure>
+	//            <system-out><![CDATA[not ok 2 - Test died with return code 1
 	//]]></system-out>
 	//        </testcase>
 	//    </testsuite>
 	//</testsuites>
 
 	ok, err := regexp.Match(`<testsuites>
-    <testsuite tests="1" failures="1" errors="0" skipped="0" time="[0-9\.]+" name="[^"]*">
+    <testsuite tests="2" failures="2" errors="0" skipped="0" time="[0-9\.]+" name="[^"]*">
         <properties></properties>
         <testcase classname="[^"]*" name="" time="[0-9\.]+">
             <failure message="not ok 1" type="TestFailed"></failure>
             <system-out><!\[CDATA\[not ok 1
+\]\]></system-out>
+        </testcase>
+        <testcase classname="[^"]*" name="Test died with return code 1" time="[0-9\.]+">
+            <failure message="not ok 2 - Test died with return code 1" type="TestFailed"></failure>
+            <system-out><!\[CDATA\[not ok 2 - Test died with return code 1
 \]\]></system-out>
         </testcase>
     </testsuite>
@@ -248,22 +258,32 @@ done_testing;`,
 	}
 
 	//<testsuites>
-	//    <testsuite tests="1" failures="1" errors="0" skipped="0" time="0.094" name="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_340899990_01_t">
+	//    <testsuite tests="2" failures="2" errors="0" skipped="0" time="0.121" name="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_990018842_01_t">
 	//        <properties></properties>
-	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_340899990_01_t" name="" time="0.094">
+	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_990018842_01_t" name="" time="0.121">
 	//            <failure message="not ok 1" type="TestFailed"></failure>
 	//            <system-out><![CDATA[not ok 1
+	//]]></system-out>
+	//        </testcase>
+	//        <testcase classname="_var_folders_qf_mkfd3g0n6zn71mmr84g_qhg80000gp_T_990018842_01_t" name="Test died with return code 1" time="0.000">
+	//            <failure message="not ok 2 - Test died with return code 1" type="TestFailed"></failure>
+	//            <system-out><![CDATA[not ok 2 - Test died with return code 1
 	//]]></system-out>
 	//        </testcase>
 	//    </testsuite>
 	//</testsuites>
 
 	ok, err := regexp.Match(`<testsuites>
-    <testsuite tests="1" failures="1" errors="0" skipped="0" time="[0-9\.]+" name="[^"]*">
+    <testsuite tests="2" failures="2" errors="0" skipped="0" time="[0-9\.]+" name="[^"]*">
         <properties></properties>
         <testcase classname="[^"]*" name="" time="[0-9\.]+">
             <failure message="not ok 1" type="TestFailed"></failure>
             <system-out><!\[CDATA\[not ok 1
+\]\]></system-out>
+        </testcase>
+        <testcase classname="[^"]*" name="Test died with return code 1" time="[0-9\.]+">
+            <failure message="not ok 2 - Test died with return code 1" type="TestFailed"></failure>
+            <system-out><!\[CDATA\[not ok 2 - Test died with return code 1
 \]\]></system-out>
         </testcase>
     </testsuite>
