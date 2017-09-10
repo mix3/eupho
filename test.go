@@ -1,9 +1,11 @@
 package eupho
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"syscall"
 
 	"github.com/mattn/go-shellwords"
 	pet "gopkg.in/mix3/pet.v3"
@@ -55,12 +57,48 @@ func (t *Test) Run() *pet.Testsuite {
 		}
 		ch <- suite
 	}()
-	cmd.Wait()
+
+	err := cmd.Wait()
 	w.Close()
 	r.Close()
 
 	suite := <-ch
 	t.Suite = suite
+
+	if err == nil {
+		return suite
+	}
+
+	// check exit code
+	if err == nil {
+		return suite
+	}
+	// from http://qiita.com/hnakamur/items/5e6f22bda8334e190f63
+	if e2, ok := err.(*exec.ExitError); ok {
+		if s, ok := e2.Sys().(syscall.WaitStatus); ok {
+			exitCode := s.ExitStatus()
+			if exitCode != 0 {
+				suite.Ok = false
+				suite.Plan++
+				suite.Tests = append(suite.Tests, &pet.Testline{
+					Ok:          false,
+					Num:         suite.Plan,
+					Description: fmt.Sprintf("Test died with return code %d", exitCode),
+				})
+			}
+			return suite
+		}
+	}
+
+	suite.Ok = false
+	suite.Plan++
+	suite.Tests = append(suite.Tests, &pet.Testline{
+		Ok:          false,
+		Num:         suite.Plan,
+		Description: "unexpected error",
+		Diagnostic:  err.Error(),
+	})
+
 	return suite
 }
 
