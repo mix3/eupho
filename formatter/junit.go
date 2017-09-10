@@ -3,12 +3,14 @@ package formatter
 import (
 	"encoding/xml"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
 	"github.com/mix3/eupho"
+	pet "gopkg.in/mix3/pet.v3"
 )
 
 type JUnitFormatter struct {
@@ -27,7 +29,8 @@ type JUnitTestSuite struct {
 	XMLName    xml.Name        `xml:"testsuite"`
 	Tests      int             `xml:"tests,attr"`
 	Failures   int             `xml:"failures,attr"`
-	Errors     int             `xml:"errors,attr,omitempty"`
+	Errors     int             `xml:"errors,attr"`
+	Skipped    int             `xml:"skipped,attr"`
 	Time       string          `xml:"time,attr"`
 	Name       string          `xml:"name,attr"`
 	Properties []JUnitProperty `xml:"properties>property,omitempty"`
@@ -42,6 +45,8 @@ type JUnitTestCase struct {
 	Time        string            `xml:"time,attr"`
 	SkipMessage *JUnitSkipMessage `xml:"skipped,omitempty"`
 	Failure     *JUnitFailure     `xml:"failure,omitempty"`
+	SystemOut   *JUnitSystemOut   `xml:"system-out,omitempty"`
+	SystemErr   *JUnitSystemErr   `xml:"system-err,omitempty"`
 }
 
 // JUnitSkipMessage contains the reason why a testcase was skipped.
@@ -62,6 +67,16 @@ type JUnitFailure struct {
 	Contents string `xml:",cdata"`
 }
 
+// JUnitSystemOut contains the standard out.
+type JUnitSystemOut struct {
+	Contents string `xml:",cdata"`
+}
+
+// JunitSystemErr contains the standard error.
+type JUnitSystemErr struct {
+	Contents string `xml:",cdata"`
+}
+
 func (f *JUnitFormatter) formatDuration(d *durpb.Duration) string {
 	dur, _ := ptypes.Duration(d)
 	return fmt.Sprintf("%.3f", dur.Seconds())
@@ -74,12 +89,8 @@ func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
 	suite := test.Suite
 
 	ts := JUnitTestSuite{
-		Tests:      0,
-		Failures:   0,
-		Time:       f.formatDuration(suite.Time),
-		Name:       className,
-		Properties: []JUnitProperty{},
-		TestCases:  []JUnitTestCase{},
+		Time: f.formatDuration(suite.Time),
+		Name: className,
 	}
 
 	for _, line := range suite.Tests {
@@ -87,14 +98,22 @@ func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
 			Classname: className,
 			Name:      line.Description,
 			Time:      f.formatDuration(line.Time),
-			Failure:   nil,
+			SystemOut: &JUnitSystemOut{
+				Contents: line.GoString(),
+			},
 		}
 		if !line.Ok {
 			ts.Failures++
 			testCase.Failure = &JUnitFailure{
-				Message:  "not ok",
-				Type:     "",
-				Contents: line.WalkDiagnostic(),
+				Message:  line.ResultString(),
+				Type:     "TestFailed",
+				Contents: line.Diagnostic,
+			}
+		}
+		if line.Directive == pet.Testline_SKIP {
+			ts.Skipped++
+			testCase.SkipMessage = &JUnitSkipMessage{
+				Message: line.Diagnostic,
 			}
 		}
 		ts.Tests++
@@ -133,6 +152,10 @@ func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
 }
 
 func (f *JUnitFormatter) Report() {
-	bytes, _ := xml.MarshalIndent(f.Suites, "", "\t")
-	os.Stdout.Write(bytes)
+	out := os.Stdout
+	io.WriteString(out, xml.Header)
+	enc := xml.NewEncoder(out)
+	enc.Indent("", "    ")
+	enc.Encode(f.Suites)
+	enc.Flush()
 }

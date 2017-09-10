@@ -13,7 +13,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
-	pet "gopkg.in/mix3/pet.v2"
+	pet "gopkg.in/mix3/pet.v3"
 )
 
 type Master struct {
@@ -155,7 +155,7 @@ func (m *Master) Result(ctx context.Context, req *ResultRequest) (*ResultRespons
 	if !m.opts.Quiet {
 		for _, line := range ts.Tests {
 			if !line.Ok {
-				fmt.Fprintln(os.Stderr, line.WalkDiagnostic())
+				fmt.Fprintln(os.Stderr, line.Diagnostic)
 			}
 		}
 	}
