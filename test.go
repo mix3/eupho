@@ -1,7 +1,6 @@
 package eupho
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -11,9 +10,13 @@ import (
 )
 
 type Test struct {
-	Path  string
-	Env   []string
-	Exec  string
+	Path string
+	Env  []string
+	Exec string
+
+	// Merge test scripts' STDERR with their STDOUT.
+	Merge bool
+
 	Suite *pet.Testsuite
 	Quiet bool
 }
@@ -23,49 +26,42 @@ func (t *Test) Run() *pet.Testsuite {
 	execParam = append(execParam, t.Path)
 	cmd := exec.Command(execParam[0], execParam[1:]...)
 	cmd.Env = t.Env
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		t.Suite = errorTestsuite(err)
-		return t.Suite
+
+	r, w := io.Pipe()
+	cmd.Stdout = w
+
+	if t.Merge {
+		cmd.Stderr = w
+	} else {
+		cmd.Stderr = os.Stderr
 	}
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
+
+	if err := cmd.Start(); err != nil {
 		t.Suite = errorTestsuite(err)
 		return t.Suite
 	}
 
-	err = cmd.Start()
-	if err != nil {
-		t.Suite = errorTestsuite(err)
-		return t.Suite
-	}
-	go io.Copy(os.Stderr, stderr)
-
-	suiteCh := make(chan *pet.Testsuite)
+	ch := make(chan *pet.Testsuite)
 	go func() {
-		var (
-			suite       *pet.Testsuite
-			parser, err = pet.NewParser(stdout)
-		)
+		parser, err := pet.NewParser(r)
 		if err != nil {
-			suite = errorTestsuite(err)
-		} else {
-			suite, err = parser.Suite()
-			if err != nil {
-				suite = errorTestsuite(err)
-			} else if suite.Plan < 0 {
-				suite = errorTestsuite(
-					fmt.Errorf("empty test. plan:%d", suite.Plan),
-				)
-			}
+			ch <- errorTestsuite(err)
+			return
 		}
-		suiteCh <- suite
+		suite, err := parser.Suite()
+		if err != nil {
+			ch <- errorTestsuite(err)
+			return
+		}
+		ch <- suite
 	}()
 	cmd.Wait()
+	w.Close()
+	r.Close()
 
-	t.Suite = <-suiteCh
-
-	return t.Suite
+	suite := <-ch
+	t.Suite = suite
+	return suite
 }
 
 func errorTestsuite(err error) *pet.Testsuite {
