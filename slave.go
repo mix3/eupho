@@ -17,6 +17,7 @@ import (
 )
 
 type Slave struct {
+	Merge   bool
 	Plugins []Plugin
 
 	chanTests  chan *Test
@@ -33,6 +34,7 @@ type slaveOptions struct {
 	Addr       string        `             long:"addr"      default:"127.0.0.1:19300" description:"Listen addr"`
 	Jobs       int           `short:"j"    long:"jobs"                                description:"Run N test jobs in parallel"`
 	Exec       string        `             long:"exec"      default:"perl"            description:""`
+	Merge      bool          `             long:"merge"                               description:"Merge test scripts' STDERR with their STDOUT"`
 	PluginArgs []string      `short:"P"    long:"plugin"                              description:"plugins"`
 	Version    bool          `             long:"version"                             description:"Show version of eupho-slave"`
 	MaxDelay   time.Duration `             long:"max-delay" default:"3s"              description:"Max delay duration"`
@@ -145,6 +147,7 @@ func (s *Slave) Run(args []string) {
 				Env:   []string{},
 				Exec:  s.opts.Exec,
 				Quiet: s.opts.Quiet,
+				Merge: s.opts.Merge,
 			}
 		}
 		close(s.chanTests)

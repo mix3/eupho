@@ -23,6 +23,7 @@ type Solo struct {
 type soloOptions struct {
 	Jobs       string   `short:"j" long:"jobs"      default:"1"    description:"Run N test jobs in parallel"`
 	Exec       string   `          long:"exec"      default:"perl" description:""`
+	Merge      bool     `          long:"merge"                    description:"Merge test scripts' STDERR with their STDOUT"`
 	PluginArgs []string `short:"P" long:"plugin"                   description:"plugins"`
 	Version    bool     `          long:"version"                  description:"Show version of eupho-slave"`
 	MaxDelay   string   `          long:"max-delay" default:"3s"   description:"Max delay duration"`
@@ -78,6 +79,9 @@ func (s *Solo) ParseArgs(args []string) {
 	}
 	if s.opts.Quiet {
 		slaveArgs = append(slaveArgs, "--quiet")
+	}
+	if s.opts.Merge {
+		slaveArgs = append(slaveArgs, "--merge")
 	}
 	s.Slave.ParseArgs(append(slaveArgs, moreArgs...))
 }
