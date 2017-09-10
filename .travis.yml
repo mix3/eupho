@@ -6,7 +6,6 @@ go:
 sudo: false
 before_install:
  - go get -u -v ./...
- - go get -u -v github.com/sevagh/stdcap
 script:
  - go test -v ./...
 before_deploy:
