@@ -2,6 +2,7 @@ package eupho
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -168,6 +169,12 @@ func (s *Slave) Run(args []string) {
 		})
 		if err != nil {
 			break // ずっとエラるようだったら諦める
+		}
+	}
+
+	for i := range s.Plugins {
+		if c, ok := s.Plugins[len(s.Plugins)-1-i].(io.Closer); ok {
+			c.Close()
 		}
 	}
 }
