@@ -33,14 +33,16 @@ func (w *Worker) run() {
 			w.slave.chanSuites <- test
 			log.Printf("finish %s", test.Path)
 		}
-		w.slave.wgWorkers.Done()
 	}
 
 	for _, p := range w.slave.Plugins {
-		f = func(g func()) func() {
-			return func() { p.Run(w, g) }
-		}(f)
+		pp := p
+		g := f
+		f = func() {
+			pp.Run(w, g)
+		}
 	}
 
 	f()
+	w.slave.wgWorkers.Done()
 }
