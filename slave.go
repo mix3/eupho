@@ -21,7 +21,7 @@ type Slave struct {
 	Merge   bool
 	Plugins []Plugin
 
-	chanTests  chan *Test
+	chanTests  chan chan *Test
 	chanSuites chan *Test
 	wgWorkers  *sync.WaitGroup
 
@@ -46,7 +46,7 @@ type slaveOptions struct {
 func NewSlave() *Slave {
 	return &Slave{
 		Plugins:    []Plugin{},
-		chanTests:  make(chan *Test),
+		chanTests:  make(chan chan *Test),
 		chanSuites: make(chan *Test),
 		wgWorkers:  &sync.WaitGroup{},
 	}
@@ -120,7 +120,11 @@ func (s *Slave) Run(args []string) {
 	client := NewEuphoClient(conn)
 
 	go func() {
+		var sendCh chan *Test
 		for {
+			sendCh = make(chan *Test)
+			s.chanTests <- sendCh
+
 			var path string
 			err := retry.Retry(s.opts.MaxRetry, s.opts.MaxDelay, func() error {
 				req := &GetTestRequest{Submitted: s.submitted}
@@ -143,14 +147,17 @@ func (s *Slave) Run(args []string) {
 				break
 			}
 
-			s.chanTests <- &Test{
+			sendCh <- &Test{
 				Path:  path,
 				Env:   []string{},
 				Exec:  s.opts.Exec,
 				Quiet: s.opts.Quiet,
 				Merge: s.opts.Merge,
 			}
+			close(sendCh)
 		}
+
+		close(sendCh)
 		close(s.chanTests)
 		s.wgWorkers.Wait()
 		close(s.chanSuites)

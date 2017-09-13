@@ -40,7 +40,10 @@ func Test__run(t *testing.T) {
 	}
 
 	w.Start()
-	s.chanTests <- test
+
+	sendCh := make(chan *Test)
+	s.chanTests <- sendCh
+	sendCh <- test
 	go func() {
 		for range s.chanSuites {
 		}

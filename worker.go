@@ -26,7 +26,11 @@ func (w *Worker) Start() {
 
 func (w *Worker) run() {
 	f := func() {
-		for test := range w.slave.chanTests {
+		for recvCh := range w.slave.chanTests {
+			test, ok := <-recvCh
+			if !ok {
+				break
+			}
 			test.Env = w.Env
 			log.Printf("start %s", test.Path)
 			test.Run()
