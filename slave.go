@@ -102,7 +102,7 @@ func (s *Slave) Run(args []string) {
 	}
 
 	for i := 0; i < s.opts.Jobs; i++ {
-		w := NewWorker(s)
+		w := NewWorker(s, i)
 		w.Start()
 	}
 

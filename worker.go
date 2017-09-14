@@ -1,6 +1,7 @@
 package eupho
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -12,9 +13,10 @@ type Worker struct {
 	wg    sync.WaitGroup
 }
 
-func NewWorker(slave *Slave) *Worker {
+func NewWorker(slave *Slave, id int) *Worker {
+	env := append(os.Environ(), fmt.Sprintf("GO_PROVE_WORKER_ID=%d", id))
 	return &Worker{
-		Env:   os.Environ(),
+		Env:   env,
 		slave: slave,
 	}
 }
