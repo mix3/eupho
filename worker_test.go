@@ -33,14 +33,17 @@ func Test__run(t *testing.T) {
 	pluginResChan = make(chan int, 4)
 
 	s := NewSlave()
-	w := NewWorker(s)
+	w := NewWorker(s, 0)
 	s.Plugins = []Plugin{
 		testPlugin(1),
 		testPlugin(2),
 	}
 
 	w.Start()
-	s.chanTests <- test
+
+	sendCh := make(chan *Test)
+	s.chanTests <- sendCh
+	sendCh <- test
 	go func() {
 		for range s.chanSuites {
 		}

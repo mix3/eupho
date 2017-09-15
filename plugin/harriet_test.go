@@ -17,7 +17,7 @@ func TestHarriet(t *testing.T) {
 		return
 	}
 
-	w := eupho.NewWorker(nil)
+	w := eupho.NewWorker(nil, 0)
 	h := harrietLoader("harriet", "harriet _harriet_test")
 
 	testfile := ""
