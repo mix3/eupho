@@ -13,6 +13,7 @@ import (
 
 	"github.com/Songmu/retry"
 	"github.com/jessevdk/go-flags"
+	"github.com/mix3/eupho/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -21,8 +22,8 @@ type Slave struct {
 	Merge   bool
 	Plugins []Plugin
 
-	chanTests  chan chan *Test
-	chanSuites chan *Test
+	chanTests  chan chan *test.Test
+	chanSuites chan *test.Test
 	wgWorkers  *sync.WaitGroup
 
 	opts slaveOptions
@@ -46,8 +47,8 @@ type slaveOptions struct {
 func NewSlave() *Slave {
 	return &Slave{
 		Plugins:    []Plugin{},
-		chanTests:  make(chan chan *Test),
-		chanSuites: make(chan *Test),
+		chanTests:  make(chan chan *test.Test),
+		chanSuites: make(chan *test.Test),
 		wgWorkers:  &sync.WaitGroup{},
 	}
 }
@@ -120,9 +121,9 @@ func (s *Slave) Run(args []string) {
 	client := NewEuphoClient(conn)
 
 	go func() {
-		var sendCh chan *Test
+		var sendCh chan *test.Test
 		for {
-			sendCh = make(chan *Test)
+			sendCh = make(chan *test.Test)
 			s.chanTests <- sendCh
 
 			var path string
@@ -147,7 +148,7 @@ func (s *Slave) Run(args []string) {
 				break
 			}
 
-			sendCh <- &Test{
+			sendCh <- &test.Test{
 				Path:  path,
 				Env:   []string{},
 				Exec:  s.opts.Exec,

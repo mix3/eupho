@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes"
 	durpb "github.com/golang/protobuf/ptypes/duration"
-	"github.com/mix3/eupho"
+	"github.com/mix3/eupho/test"
 	pet "gopkg.in/mix3/pet.v3"
 )
 
@@ -82,7 +82,7 @@ func (f *JUnitFormatter) formatDuration(d *durpb.Duration) string {
 	return fmt.Sprintf("%.3f", dur.Seconds())
 }
 
-func (f *JUnitFormatter) OpenTest(test *eupho.Test) {
+func (f *JUnitFormatter) OpenTest(test *test.Test) {
 	className := strings.Replace(test.Path, "/", "_", -1)
 	className = strings.Replace(className, ".", "_", -1)
 
