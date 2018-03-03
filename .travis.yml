@@ -1,9 +1,7 @@
 language: go
 go:
- - 1.6.x
- - 1.7.x
- - 1.8.x
  - 1.9.x
+ - 1.10.x
  - tip
 sudo: false
 before_install:
@@ -30,6 +28,6 @@ deploy:
     - build/eupho-solo_linux_amd64
     - build/eupho-solo_linux_arm
   on:
-    go: '1.7'
+    go: '1.10.x'
     repo: mix3/eupho
     tags: true
