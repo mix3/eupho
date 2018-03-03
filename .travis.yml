@@ -16,7 +16,7 @@ deploy:
   skip_cleanup: true
   provider: releases
   api_key:
-    secure: "P6kPD800QSNoEDAtUvN+3oZG9UvQRkP1TMUlCnNx6CynURSDSzRFp28V8fzWAAKKUvPPUbAEsMhIog9CebwrW6QWLxSONomvva2IijdqQyFloFQ/tkdy+/4uXlZIbfnWRmRYSwYFd7J9zGSWKxARq+zRyoiNbzwHtoCgEW0HVXQxg64Dn/naSds0lce1BE4GBA5ApxTtKwclOCEwQKn7dP5WO21KmXkKZPvtj6yHyRavDm9dDHwz5vOh+nSardokWrjNFlnOBYyq6/wgGGYybl2jB1AHQZM4yX6c3o4K2B5xzBTzYGg2MZqOM5a7wKFveg2jVsbuAphlZCIpsCvF/DmorpqWOY5h0ciHi5FWlLDQxitiaWvIEZCQ32P0dXZIJYcJ6O2pj4gNCBXkHXdut+WIVO24IZLpiE/GgU1/itZalG1RzaHq26W5kRNgg5ZlkUxOEgNhDxikr+X5rBFTKL1OCxWmDo5odcsGE7zGO/iajKxq3JWUnGat56gG121/yy5UpuamvKesV/QSJBdyyr0w/BgsvWWYTwW5uj1u59YBNApdm1Jv0nrTkN7HADGqDB1d5crm4Vi8hx0WW4xYnhmD3Hx06KJcJ6DyjgAjVDEU/LdyP7q09icWP3xHZkQ88I0/E0m04S+1SvKQxBksJNn38OzKftErU6SassQ6koU="
+    secure: "ta5W2j4REYHD7IrprGEclkojNF99cNJWJBSqtdmQJY3FIKE06wbBy+Q9jzYwgQN0lf0F91FGN7SXrN67pke4/3PsRV9o6iMSHZPoT7LYc8Hw4j7JjLVdgSN6ADF64zWqBNuXN122pH5fU7LOm1gkT9ZiS2AFmKvGbgtyF/AjnnmF5VyZnEdnBsQS8DgYm52keOe6PyEUyX4FY7Mi5OCAzqcvHtjc6Inr7RO+9CCYTAMayxHm/3yN6IiXGoERbzAaTjx1J650RbMLf0acbZc15hQ0i+qoIKvPwYC4FT8kca9nJsmfQlLlisJXQx1n1yyf5cs4cki/SMCSu/YKP1D6s1/xyDe1odbyBd5J1+JcV2ugX22YF1cMUlVboKyF6FXTziHrEOTCNHxCX1+54mtVfQk15MSuC5mnbKAB+CuUtXkY9LPP9weQ2bdemo/x4F1vjteNBh4LOxgLROyUexmvKPNKkjMdag/wyWRYg84KFc/akeBiNj9Uzv0Sr6UamZBV7ptvfINAhaZfSJZN6H3xJb+iqbPPHni9EXan8c312N+E92Un9hSftLD6y/lMivdkUA2gsk31Oh0ctQDievqcXmIsQNhtn3cNw0c92DAyhuVV8rtAsk+8pCv4M3JvfkCLo76SVAWfHy7/Y4KzShzD9c63NsIuj/OZi292t/a1D5M="
   file:
     - build/eupho_linux_386
     - build/eupho_linux_amd64
@@ -28,6 +28,6 @@ deploy:
     - build/eupho-solo_linux_amd64
     - build/eupho-solo_linux_arm
   on:
-    go: '1.10.x'
+    go: '1.10'
     repo: mix3/eupho
     tags: true
