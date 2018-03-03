@@ -5,6 +5,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/mix3/eupho/test"
 )
 
 type testPlugin int
@@ -24,7 +26,7 @@ func Test__run(t *testing.T) {
 	}
 	f.WriteString(`print "1..1\nok 1\n";`)
 
-	test := &Test{
+	tt := &test.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
 		Exec: "perl",
@@ -41,9 +43,9 @@ func Test__run(t *testing.T) {
 
 	w.Start()
 
-	sendCh := make(chan *Test)
+	sendCh := make(chan *test.Test)
 	s.chanTests <- sendCh
-	sendCh <- test
+	sendCh <- tt
 	go func() {
 		for range s.chanSuites {
 		}

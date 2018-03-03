@@ -1,4 +1,4 @@
-package eupho
+package test
 
 import (
 	"fmt"

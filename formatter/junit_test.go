@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/mix3/eupho"
 	"github.com/mix3/eupho/formatter"
+	"github.com/mix3/eupho/test"
 )
 
 func TestJUnit_success(t *testing.T) {
@@ -18,7 +18,7 @@ func TestJUnit_success(t *testing.T) {
 	}
 	f.WriteString(`print "1..1\nok 1\n";`)
 
-	test := &eupho.Test{
+	test := &test.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
 		Exec: "perl",
@@ -49,7 +49,7 @@ func TestJUnit_fail(t *testing.T) {
 	}
 	f.WriteString(`print "1..1\nnot ok 1\n";`)
 
-	test := &eupho.Test{
+	test := &test.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
 		Exec: "perl",
@@ -81,7 +81,7 @@ func TestJUnit_failplan(t *testing.T) {
 	}
 	f.WriteString(`print "1..2\nok 1\n";`)
 
-	test := &eupho.Test{
+	test := &test.Test{
 		Path: f.Name(),
 		Env:  os.Environ(),
 		Exec: "perl",

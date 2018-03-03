@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/mix3/eupho/formatter"
+	"github.com/mix3/eupho/test"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
@@ -34,10 +36,11 @@ type Master struct {
 }
 
 type masterOptions struct {
-	Addr    string        `          long:"addr"    default:"127.0.0.1:19300" description:"Listen addr"`
-	Timeout time.Duration `          long:"timeout" default:"10m"             description:"Timeout duration"`
-	Version bool          `          long:"version"                           description:"Show version of eupho"`
-	Quiet   bool          `short:"q" long:"quiet"                             description:"quiet"`
+	Addr      string        `          long:"addr"    default:"127.0.0.1:19300" description:"Listen addr"`
+	Timeout   time.Duration `          long:"timeout" default:"10m"             description:"Timeout duration"`
+	Version   bool          `          long:"version"                           description:"Show version of eupho"`
+	Quiet     bool          `short:"q" long:"quiet"                             description:"quiet"`
+	Formatter string        `          long:"formatter"                         description:"Result formatter to use."`
 }
 
 func NewMaster() *Master {
@@ -83,6 +86,15 @@ func (m *Master) Run(args []string) int {
 		return m.exitCode
 	}
 
+	switch m.opts.Formatter {
+	case "junit":
+		m.Formatter = &formatter.JUnitFormatter{}
+	case "tap", "":
+		m.Formatter = &formatter.TapFormatter{}
+	default:
+		panic(fmt.Sprintf("unknown formatter: %s", m.opts.Formatter))
+	}
+
 	m.startServe()
 
 	if err := <-m.endCh; err != nil {
@@ -118,7 +130,7 @@ func (m *Master) stopServe() {
 
 func (m *Master) report() {
 	for path, suite := range m.testResult {
-		m.Formatter.OpenTest(&Test{
+		m.Formatter.OpenTest(&test.Test{
 			Path:  path,
 			Suite: suite,
 		})

@@ -30,6 +30,7 @@ type soloOptions struct {
 	MaxRetry   string   `          long:"max-retry" default:"10"   description:"Max retry num"`
 	Timeout    string   `          long:"timeout"   default:"10m"  description:"Timeout duration"`
 	Quiet      bool     `short:"q" long:"quiet"                    description:"quiet"`
+	Formatter  string   `          long:"formatter"                description:"Result formatter to use."`
 }
 
 func NewSolo() *Solo {
@@ -61,11 +62,15 @@ func (s *Solo) ParseArgs(args []string) {
 	}
 	defer l.Close()
 
-	s.Master.ParseArgs([]string{
+	masterArgs := []string{
 		"--timeout", s.opts.Timeout,
 		"--addr", l.Addr().String(),
 		"--quiet",
-	})
+	}
+	if s.opts.Formatter != "" {
+		masterArgs = append(masterArgs, "--formatter", s.opts.Formatter)
+	}
+	s.Master.ParseArgs(masterArgs)
 
 	slaveArgs := []string{
 		"--addr", l.Addr().String(),
