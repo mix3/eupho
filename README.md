@@ -17,10 +17,10 @@ go get github.com/mix3/eupho/cmd/eupho-solo
 ### master/slave
 
 ```
-eupho [options] [files or directories]
+eupho [options]
 ```
 ```
-eupho-slave [options]
+eupho-slave [options] [files or directories]
 ```
 
 ### solo

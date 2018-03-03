@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/mix3/eupho"
-	"github.com/mix3/eupho/formatter"
 )
 
 func newTempFiles(files map[string]string) (string, error) {
@@ -59,9 +58,9 @@ done_testing;`,
 	}()
 
 	m := eupho.NewMaster()
-	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
 		"--addr", addr,
+		"--formatter", "junit",
 	})
 	code := 0
 	out := captureStdout(func() {
@@ -129,9 +128,9 @@ done_testing;`,
 	}()
 
 	m := eupho.NewMaster()
-	m.Formatter = &formatter.JUnitFormatter{}
 	m.ParseArgs([]string{
 		"--addr", addr,
+		"--formatter", "junit",
 	})
 	code := 1
 	out := captureStdout(func() {
@@ -193,8 +192,8 @@ done_testing;`,
 	defer os.RemoveAll(dir)
 
 	s := eupho.NewSolo()
-	s.Master.Formatter = &formatter.JUnitFormatter{}
 	s.ParseArgs([]string{
+		"--formatter", "junit",
 		dir,
 	})
 	code := 0
@@ -245,8 +244,8 @@ done_testing;`,
 	defer os.RemoveAll(dir)
 
 	s := eupho.NewSolo()
-	s.Master.Formatter = &formatter.JUnitFormatter{}
 	s.ParseArgs([]string{
+		"--formatter", "junit",
 		dir,
 	})
 	code := 1
